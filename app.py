@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import mysql.connector
 import os
 
 # ---------------------------------
@@ -14,53 +13,17 @@ st.set_page_config(
 st.title("🎾 Tennis SportRadar Analytics")
 
 # ---------------------------------
-# MySQL Connection (LOCAL + CLOUD SAFE)
+# Data Loading (CLOUD SAFE)
 # ---------------------------------
-def get_connection():
-    """
-    Uses Streamlit secrets in deployment
-    Falls back to local credentials when running locally
-    """
-    try:
-        conn = mysql.connector.connect(
-            host=st.secrets["mysql"]["host"],
-            user=st.secrets["mysql"]["user"],
-            password=st.secrets["mysql"]["password"],
-            database=st.secrets["mysql"]["database"],
-            port=st.secrets["mysql"].get("port", 3306)
-        )
-        return conn
-    except Exception:
-        # LOCAL fallback (your system)
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Samsung987",   # ONLY used locally
-            database="tennis_sport_radar"
-        )
-        return conn
+DATA_FILE = "competitions.csv"
 
-try:
-    conn = get_connection()
-    st.success("Data loaded successfully from MySQL!")
-except Exception as e:
-    st.error(f"MySQL Connection Failed: {e}")
+if not os.path.exists(DATA_FILE):
+    st.error("❌ competitions.csv not found. Please ensure it exists in the repository.")
     st.stop()
 
-# ---------------------------------
-# Load Data
-# ---------------------------------
-query = """
-SELECT
-    competition_id,
-    competition_name,
-    match_type,
-    tournament_category,
-    gender_category
-FROM competitions
-"""
+df = pd.read_csv(DATA_FILE)
 
-df = pd.read_sql(query, conn)
+st.success("✅ Data loaded successfully!")
 
 # ---------------------------------
 # Sidebar Filters
@@ -161,4 +124,4 @@ st.bar_chart(gender_counts.set_index("Gender"))
 # Footer
 # ---------------------------------
 st.markdown("---")
-st.caption("📊 Tennis SportRadar Analytics Dashboard | Built with Streamlit & MySQL")
+st.caption("📊 Tennis SportRadar Analytics Dashboard | Built with Streamlit")
