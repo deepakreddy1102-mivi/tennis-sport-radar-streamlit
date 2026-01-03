@@ -47,42 +47,62 @@ if selected_gender != "All":
 
 # ---------------- Data Preview ----------------
 st.subheader("📋 Competitions Data Preview")
-st.dataframe(filtered_df.head(50), use_container_width=True)
+
+if filtered_df.empty:
+    st.warning("No data available for the selected filters.")
+else:
+    st.dataframe(filtered_df.head(50), use_container_width=True)
 
 # ---------------- Summary ----------------
 st.subheader("📊 Summary")
 
 col1, col2, col3 = st.columns(3)
 col1.metric("Total Competitions", len(filtered_df))
-col2.metric("Match Types", filtered_df["match_type"].nunique())
-col3.metric("Tournament Categories", filtered_df["tournament_category"].nunique())
+col2.metric("Match Types", filtered_df["match_type"].nunique() if not filtered_df.empty else 0)
+col3.metric("Tournament Categories", filtered_df["tournament_category"].nunique() if not filtered_df.empty else 0)
 
 # ---------------- Visual Analysis ----------------
 st.subheader("📈 Visual Analysis")
 
-# Match Type Distribution
+if filtered_df.empty:
+    st.warning("Charts are not shown because no data matches the selected filters.")
+    st.stop()
+
+# ---------- Match Type Distribution ----------
 st.markdown("### Match Type Distribution")
 match_counts = filtered_df["match_type"].value_counts()
-fig, ax = plt.subplots()
-match_counts.plot(kind="bar", ax=ax)
-ax.set_xlabel("Match Type")
-ax.set_ylabel("Count")
-st.pyplot(fig)
 
-# Tournament Category Distribution (Top 10)
+if not match_counts.empty:
+    fig, ax = plt.subplots()
+    match_counts.plot(kind="bar", ax=ax)
+    ax.set_xlabel("Match Type")
+    ax.set_ylabel("Count")
+    st.pyplot(fig)
+else:
+    st.info("No match type data available.")
+
+# ---------- Tournament Category Distribution ----------
 st.markdown("### Top 10 Tournament Categories")
 tournament_counts = filtered_df["tournament_category"].value_counts().head(10)
-fig, ax = plt.subplots()
-tournament_counts.plot(kind="bar", ax=ax)
-ax.set_xlabel("Tournament Category")
-ax.set_ylabel("Count")
-st.pyplot(fig)
 
-# Gender Category Distribution
+if not tournament_counts.empty:
+    fig, ax = plt.subplots()
+    tournament_counts.plot(kind="bar", ax=ax)
+    ax.set_xlabel("Tournament Category")
+    ax.set_ylabel("Count")
+    st.pyplot(fig)
+else:
+    st.info("No tournament category data available.")
+
+# ---------- Gender Category Distribution ----------
 st.markdown("### Gender Category Distribution")
 gender_counts = filtered_df["gender_category"].value_counts()
-fig, ax = plt.subplots()
-gender_counts.plot(kind="bar", ax=ax)
-ax.set_xlabel("Gender Category")
-ax.set_ylabel("Count")
-st.pyplot(fig)
+
+if not gender_counts.empty:
+    fig, ax = plt.subplots()
+    gender_counts.plot(kind="bar", ax=ax)
+    ax.set_xlabel("Gender Category")
+    ax.set_ylabel("Count")
+    st.pyplot(fig)
+else:
+    st.info("No gender category data available.")
